@@ -31,7 +31,7 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.8.3
         with:
           pixi-version: latest
-          cache: true
+          cache: false
           environments: default
 
       - name: List available pixi tasks
