@@ -61,6 +61,7 @@ compilers       = "*"          # gcc (linux) / clang (mac) for C-extension build
 pip             = "*"
 git             = "*"
 git-lfs         = "*"
+pybind11        = "*"
 # Encoder/decoder library for semantic segmentation models.
 segmentation-models-pytorch = "*"
 
