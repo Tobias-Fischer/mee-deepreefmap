@@ -24,14 +24,12 @@ cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ 
 [tasks.train-sfm]
 # Train the SfM (depth-estimation) network on your own data.
 args = ["data", "name"]
-cmd = "python sfm/train_sfm.py --data={{ data }} --name={{ name }}"
-cwd = "src"
+cmd = "python src/sfm/train_sfm.py --data={{ data }} --name={{ name }}"
 
 [tasks.train-segmentation]
 # Train the semantic segmentation network on your own data.
 args = ["data", "name"]
-cmd = "python segmentation/train_segmentation_model.py --data={{ data }} --name={{ name }}"
-cwd = "src"
+cmd = "python src/segmentation/train_segmentation_model.py --data={{ data }} --name={{ name }}"
 
 # ---------------------------------------------------------------------------
 # Base (platform-independent) conda dependencies
