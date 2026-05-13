@@ -1,0 +1,110 @@
+[project]
+name = "mee-deepreefmap"
+version = "1.1.0"
+description = "Scalable 3D Semantic Mapping of Coral Reefs using Deep Learning"
+channels = ["pytorch", "conda-forge"]
+platforms = ["linux-64", "osx-arm64"]
+
+# ---------------------------------------------------------------------------
+# Tasks – mirror the workflows described in README.md
+# ---------------------------------------------------------------------------
+[tasks]
+# Run a 3D reconstruction from a GoPro Hero 10 video.
+# Pass extra args, e.g.:
+#   pixi run reconstruct --input_video=video.MP4 --timestamp=0-100 --out_dir=out
+reconstruct = { cmd = "python reconstruct.py", cwd = "src" }
+
+# Train the SfM (depth-estimation) network on your own data.
+# Pass extra args, e.g.:
+#   pixi run train-sfm --data <PATH> --checkpoint <CKPT> --name <WANDB_NAME>
+train-sfm = { cmd = "python sfm/train_sfm.py", cwd = "src" }
+
+# Train the semantic segmentation network on your own data.
+# Pass extra args, e.g.:
+#   pixi run train-segmentation --data <PATH> --checkpoint <CKPT> --name <WANDB_NAME>
+train-segmentation = { cmd = "python segmentation/train_segmentation_model.py", cwd = "src" }
+
+# Build the Docker image.
+build-docker = "docker build -t deepreefmap ."
+
+# ---------------------------------------------------------------------------
+# Base (platform-independent) conda dependencies
+# ---------------------------------------------------------------------------
+[dependencies]
+python          = ">=3.10,<3.12"
+addict          = ">=2.4.0"
+h5py            = ">=3.7.0"
+matplotlib      = ">=3.5.3"
+numpy           = ">=1.26.4,<2"
+pandas          = ">=1.4.4"
+pillow          = ">=9.1"
+scikit-image    = ">=0.24.0"
+scikit-learn    = ">=1.5.2"
+scipy           = ">=1.14.1"
+tqdm            = ">=4.64.1"
+wandb           = ">=0.13.7"
+ffmpeg          = "*"          # provides ffmpeg + ffprobe in PATH
+pybind11        = "*"          # required to build gpmfstream C extension
+setuptools      = "*"
+c-compiler      = "*"          # gcc (linux) / clang (mac) for C-extension builds
+pip             = "*"
+git             = "*"
+
+# ---------------------------------------------------------------------------
+# PyPI-only dependencies (no conda-forge package available)
+# ---------------------------------------------------------------------------
+[pypi-dependencies]
+# Encoder/decoder library for semantic segmentation models.
+segmentation-models-pytorch = ">=0.3.3"
+
+# GoPro Metadata Format stream parser (C extension; uses git submodules).
+# pip / uv will clone the repo and initialise submodules automatically.
+gpmfstream = { git = "https://github.com/hovren/gpmfstream.git", rev = "f1a9742" }
+
+# ---------------------------------------------------------------------------
+# Linux-64: open3d is available on conda-forge; pytorch via the pytorch channel
+# (CPU-only in the default environment – see [feature.cuda] for GPU support).
+# ---------------------------------------------------------------------------
+[target.linux-64.dependencies]
+open3d = ">=0.16.0"
+
+# ---------------------------------------------------------------------------
+# macOS (Apple Silicon): pytorch from the pytorch channel (always CPU on arm64);
+# open3d only via PyPI on osx-arm64 (no conda-forge build available).
+# ---------------------------------------------------------------------------
+[target.osx-arm64.dependencies]
+pytorch     = { version = ">=2.0.1", channel = "pytorch" }
+torchvision = { version = ">=0.15.2", channel = "pytorch" }
+torchaudio  = { version = ">=2.0.2", channel = "pytorch" }
+
+[target.osx-arm64.pypi-dependencies]
+open3d = ">=0.16.0"
+
+# ===========================================================================
+# Feature: cpu  – CPU-only PyTorch on Linux (default environment)
+# ===========================================================================
+[feature.cpu.target.linux-64.dependencies]
+pytorch     = { version = ">=2.0.1", channel = "pytorch" }
+torchvision = { version = ">=0.15.2", channel = "pytorch" }
+torchaudio  = { version = ">=2.0.2", channel = "pytorch" }
+cpuonly     = { version = "*",        channel = "pytorch" }
+
+# ===========================================================================
+# Feature: cuda  – CUDA-enabled PyTorch on Linux (requires an NVIDIA GPU)
+# Use:  pixi install --environment cuda
+#       pixi run --environment cuda reconstruct ...
+# ===========================================================================
+[feature.cuda.target.linux-64.dependencies]
+pytorch       = { version = ">=2.0.1", channel = "pytorch" }
+torchvision   = { version = ">=0.15.2", channel = "pytorch" }
+torchaudio    = { version = ">=2.0.2", channel = "pytorch" }
+pytorch-cuda  = { version = ">=11.8",  channel = "pytorch" }
+
+# ===========================================================================
+# Environments
+# ===========================================================================
+[environments]
+# Default: CPU-only on Linux, MPS-capable on macOS Apple Silicon.
+default = { features = ["cpu"], solve-group = "default" }
+# GPU/CUDA: Linux only.  Adds CUDA-enabled pytorch.
+cuda    = { features = ["cuda"], solve-group = "cuda" }
