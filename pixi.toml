@@ -59,7 +59,7 @@ git             = "*"
 # ---------------------------------------------------------------------------
 [pypi-dependencies]
 # Encoder/decoder library for semantic segmentation models.
-segmentation-models-pytorch = ">=0.3.3"
+segmentation-models-pytorch = "*"
 
 # GoPro Metadata Format stream parser (C extension; uses git submodules).
 # pip / uv will clone the repo and initialise submodules automatically.
