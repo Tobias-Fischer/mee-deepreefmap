@@ -20,6 +20,22 @@ args = [
   { arg = "out_dir", default = "out" },
 ]
 cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ timestamp }} --out_dir={{ out_dir }}"
+depends-on = ["_install"]
+inputs = [
+  "src/*.py",
+  "src/segmentation/*.py",
+  "src/sfm/*.py",
+  "example_inputs/*.json",
+  "sfm_net.pth",
+  "segmentation_net.pth",
+  "{{ input_video }}",
+]
+outputs = [
+  "{{ out_dir }}/class_to_color.json",
+  "{{ out_dir }}/percentage_covers.json",
+  "{{ out_dir }}/point_cloud_tsdf.csv",
+  "{{ out_dir }}/results.npy",
+]
 
 [tasks.train-sfm]
 # Train the SfM (depth-estimation) network on your own data.
@@ -27,6 +43,14 @@ cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ 
 #   name : experiment name logged to Weights & Biases
 args = ["data", "name"]
 cmd = "python src/sfm/train_sfm.py --data={{ data }} --name={{ name }}"
+inputs = [
+  "src/sfm/*.py",
+  "{{ data }}/**/*",
+]
+outputs = [
+  "{{ name }}_best.pth",
+  "{{ name }}_last.pth",
+]
 
 [tasks.train-segmentation]
 # Train the semantic segmentation network on your own data.
@@ -34,6 +58,21 @@ cmd = "python src/sfm/train_sfm.py --data={{ data }} --name={{ name }}"
 #   name : experiment name logged to Weights & Biases
 args = ["data", "name"]
 cmd = "python src/segmentation/train_segmentation_model.py --data={{ data }} --name={{ name }}"
+inputs = [
+  "src/segmentation/*.py",
+  "{{ data }}/**/*",
+]
+outputs = [
+  "{{ name }}.pth",
+]
+
+[tasks._install]
+# Fetch Git-LFS managed checkpoint files used by the reconstruction workflow.
+cmd = "git-lfs pull"
+outputs = [
+  "sfm_net.pth",
+  "segmentation_net.pth",
+]
 
 # ---------------------------------------------------------------------------
 # Base (platform-independent) conda dependencies
@@ -80,7 +119,7 @@ mee-deepreefmap = { path = ".", editable = true }
 # Pinned to the same commit as `ARG GPMFSTREAM_GIT_HASH` in `Dockerfile`
 # (the upstream repository does not publish versioned releases; update both
 # files together when bumping the revision).
-gpmfstream = { git = "https://github.com/hovren/gpmfstream.git", rev = "f1a9742de838ddb413fb490f8ac40d8c675b96e8" }
+gpmfstream = { git = "https://github.com/Tobias-Fischer/gpmfstream", rev = "ab23cfd06f65a04c3de835bba3747f6aefa6a40d" }
 
 [feature.cuda.target.linux-64.dependencies]
 pytorch-gpu = "*"
