@@ -61,9 +61,12 @@ wandb           = "*"
 ffmpeg          = "*"          # provides ffmpeg + ffprobe in PATH
 pybind11        = "*"          # required to build gpmfstream C extension
 setuptools      = "*"
-c-compiler      = "*"          # gcc (linux) / clang (mac) for C-extension builds
+compilers       = "*"          # gcc (linux) / clang (mac) for C-extension builds
 pip             = "*"
 git             = "*"
+git-lfs         = "*"
+# Encoder/decoder library for semantic segmentation models.
+segmentation-models-pytorch = "*"
 
 # ---------------------------------------------------------------------------
 # PyPI-only dependencies (no conda-forge package available)
@@ -73,9 +76,6 @@ git             = "*"
 # editably so scripts can import them without path manipulation.
 mee-deepreefmap = { path = ".", editable = true }
 
-# Encoder/decoder library for semantic segmentation models.
-segmentation-models-pytorch = "*"
-
 # GoPro Metadata Format stream parser (C extension; uses git submodules).
 # pip / uv will clone the repo and initialise submodules automatically.
 # Pinned to the same commit as `ARG GPMFSTREAM_GIT_HASH` in `Dockerfile`
@@ -83,19 +83,5 @@ segmentation-models-pytorch = "*"
 # files together when bumping the revision).
 gpmfstream = { git = "https://github.com/hovren/gpmfstream.git", rev = "f1a9742de838ddb413fb490f8ac40d8c675b96e8" }
 
-# ===========================================================================
-# Feature: cuda  – CUDA-enabled PyTorch on Linux (requires an NVIDIA GPU)
-# Use:  pixi install --environment cuda
-#       pixi run --environment cuda reconstruct ...
-# ===========================================================================
-[feature.cuda.target.linux-64.dependencies]
+[target.linux-64.dependencies]
 pytorch-gpu = "*"
-
-# ===========================================================================
-# Environments
-# ===========================================================================
-[environments]
-# Default: CPU on Linux, MPS-capable on macOS Apple Silicon.
-default = { solve-group = "default" }
-# GPU/CUDA: Linux only. Adds the conda-forge GPU selector package.
-cuda    = { features = ["cuda"], solve-group = "cuda" }
