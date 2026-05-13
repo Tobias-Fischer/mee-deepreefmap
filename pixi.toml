@@ -82,5 +82,14 @@ mee-deepreefmap = { path = ".", editable = true }
 # files together when bumping the revision).
 gpmfstream = { git = "https://github.com/hovren/gpmfstream.git", rev = "f1a9742de838ddb413fb490f8ac40d8c675b96e8" }
 
-[target.linux-64.dependencies]
+[feature.cuda.target.linux-64.dependencies]
 pytorch-gpu = "*"
+
+# ===========================================================================
+# Environments
+# ===========================================================================
+[environments]
+# Default: CPU on Linux, MPS-capable on macOS Apple Silicon.
+default = { solve-group = "default" }
+# GPU/CUDA: Linux only. Adds the conda-forge GPU selector package.
+cuda    = { features = ["cuda"], solve-group = "cuda" }
