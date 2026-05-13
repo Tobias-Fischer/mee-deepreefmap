@@ -14,6 +14,9 @@ cuda = "12"
 
 [tasks.reconstruct]
 # Run a 3D reconstruction from a GoPro Hero 10 video.
+#   input_video : path to the MP4 file (comma-separated for multi-clip transects)
+#   timestamp   : begin-end marker, e.g. "0-100" or "0:23-end,begin-1:44"
+#   out_dir     : output directory (default: "out")
 args = [
   "input_video",
   "timestamp",
@@ -23,11 +26,15 @@ cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ 
 
 [tasks.train-sfm]
 # Train the SfM (depth-estimation) network on your own data.
+#   data : path to the dataset directory (KITTI VO layout with train.txt / val.txt)
+#   name : experiment name logged to Weights & Biases
 args = ["data", "name"]
 cmd = "python src/sfm/train_sfm.py --data={{ data }} --name={{ name }}"
 
 [tasks.train-segmentation]
 # Train the semantic segmentation network on your own data.
+#   data : path to the dataset directory (classes.json, colors.json, scene folders)
+#   name : experiment name logged to Weights & Biases
 args = ["data", "name"]
 cmd = "python src/segmentation/train_segmentation_model.py --data={{ data }} --name={{ name }}"
 
@@ -71,9 +78,9 @@ segmentation-models-pytorch = "*"
 
 # GoPro Metadata Format stream parser (C extension; uses git submodules).
 # pip / uv will clone the repo and initialise submodules automatically.
-# Keep this pinned to the commit referenced by `ARG GPMFSTREAM_GIT_HASH` in
-# `Dockerfile`, because the upstream repository does not publish versioned
-# releases.
+# Pinned to the same commit as `ARG GPMFSTREAM_GIT_HASH` in `Dockerfile`
+# (the upstream repository does not publish versioned releases; update both
+# files together when bumping the revision).
 gpmfstream = { git = "https://github.com/hovren/gpmfstream.git", rev = "f1a9742de838ddb413fb490f8ac40d8c675b96e8" }
 
 # ===========================================================================
