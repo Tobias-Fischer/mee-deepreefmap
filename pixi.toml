@@ -63,6 +63,7 @@ segmentation-models-pytorch = "*"
 
 # GoPro Metadata Format stream parser (C extension; uses git submodules).
 # pip / uv will clone the repo and initialise submodules automatically.
+# Keep this pinned to the same commit currently used by the Docker-based setup.
 gpmfstream = { git = "https://github.com/hovren/gpmfstream.git", rev = "f1a9742de838ddb413fb490f8ac40d8c675b96e8" }
 
 # ===========================================================================
