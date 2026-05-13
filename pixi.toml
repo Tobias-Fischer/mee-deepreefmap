@@ -67,6 +67,9 @@ segmentation-models-pytorch = "*"
 # ---------------------------------------------------------------------------
 # PyPI-only dependencies (no conda-forge package available)
 # ---------------------------------------------------------------------------
+[pypi-options]
+no-build-isolation = true
+
 [pypi-dependencies]
 # Install this project's own packages (sfm, segmentation, video_utils, …)
 # editably so scripts can import them without path manipulation.
