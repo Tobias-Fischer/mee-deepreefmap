@@ -11,21 +11,27 @@ cuda = "12"
 # ---------------------------------------------------------------------------
 # Tasks – mirror the workflows described in README.md
 # ---------------------------------------------------------------------------
-[tasks]
+
+[tasks.reconstruct]
 # Run a 3D reconstruction from a GoPro Hero 10 video.
-# Pass extra args, e.g.:
-#   pixi run reconstruct --input_video=video.MP4 --timestamp=0-100 --out_dir=out
-reconstruct = { cmd = "python reconstruct.py", cwd = "src" }
+args = [
+  "input_video",
+  "timestamp",
+  { arg = "out_dir", default = "out" },
+]
+cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ timestamp }} --out_dir={{ out_dir }}"
 
+[tasks.train-sfm]
 # Train the SfM (depth-estimation) network on your own data.
-# Pass extra args, e.g.:
-#   pixi run train-sfm --data <PATH> --checkpoint <CKPT> --name <WANDB_NAME>
-train-sfm = { cmd = "python sfm/train_sfm.py", cwd = "src" }
+args = ["data", "name"]
+cmd = "python sfm/train_sfm.py --data={{ data }} --name={{ name }}"
+cwd = "src"
 
+[tasks.train-segmentation]
 # Train the semantic segmentation network on your own data.
-# Pass extra args, e.g.:
-#   pixi run train-segmentation --data <PATH> --checkpoint <CKPT> --name <WANDB_NAME>
-train-segmentation = { cmd = "python segmentation/train_segmentation_model.py", cwd = "src" }
+args = ["data", "name"]
+cmd = "python segmentation/train_segmentation_model.py --data={{ data }} --name={{ name }}"
+cwd = "src"
 
 # ---------------------------------------------------------------------------
 # Base (platform-independent) conda dependencies
@@ -58,6 +64,10 @@ git             = "*"
 # PyPI-only dependencies (no conda-forge package available)
 # ---------------------------------------------------------------------------
 [pypi-dependencies]
+# Install this project's own packages (sfm, segmentation, video_utils, …)
+# editably so scripts can import them without path manipulation.
+mee-deepreefmap = { path = ".", editable = true }
+
 # Encoder/decoder library for semantic segmentation models.
 segmentation-models-pytorch = "*"
 

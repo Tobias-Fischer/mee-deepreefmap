@@ -49,8 +49,6 @@ jobs:
       - name: Import core project modules
         run: |
           pixi run python -c "
-          import sys, pathlib
-          sys.path.insert(0, str(pathlib.Path('src').resolve()))
           import video_utils
           from sfm.model import SfMModel
           from segmentation.model import SegmentationModel
