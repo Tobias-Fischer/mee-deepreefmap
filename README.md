@@ -6,10 +6,12 @@ The [project page](https://josauder.github.io/deepreefmap/) contains more inform
 
 ## Installation
 
-Install [Pixi](https://pixi.sh/latest/) and clone this repository with Git-LFS enabled.
+First install [Pixi](https://pixi.sh/). 
 
+Then clone this repository:
 ```bash
-git lfs install
+git clone https://github.com/Tobias-Fischer/mee-deepreefmap.git
+cd mee-deepreefmap
 pixi install
 ```
 
