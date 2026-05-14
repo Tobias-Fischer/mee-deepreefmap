@@ -14,13 +14,16 @@ platforms = ["linux-64", "osx-arm64"]
 #   input_video : path to the MP4 file (comma-separated for multi-clip transects)
 #   timestamp   : begin-end marker, e.g. "0-100" or "0:23-end,begin-1:44"
 #   out_dir     : output directory (default: "out")
+#   fps         : frame extraction rate (default: 10 for the example data)
 args = [
   "input_video",
   "timestamp",
   { arg = "out_dir", default = "out" },
+  { arg = "fps", default = "10" },
 ]
-cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ timestamp }} --out_dir={{ out_dir }}"
+cmd = "python src/reconstruct.py --input_video={{ input_video }} --timestamp={{ timestamp }} --out_dir={{ out_dir }} --tmp_dir={{ out_dir }}/tmp --fps={{ fps }} --sfm_checkpoint=sfm_net.pth --segmentation_checkpoint=segmentation_net.pth --intrinsics_file=example_inputs/intrinsics_eucm.json --class_to_label_file=example_inputs/class_to_label.json --class_to_color_file=example_inputs/class_to_color.json"
 depends-on = ["_install"]
+env = { MPLCONFIGDIR = ".pixi/matplotlib", TORCH_HOME = ".pixi/torch", HF_HOME = ".pixi/huggingface" }
 inputs = [
   "src/*.py",
   "src/segmentation/*.py",
@@ -35,6 +38,18 @@ outputs = [
   "{{ out_dir }}/percentage_covers.json",
   "{{ out_dir }}/point_cloud_tsdf.csv",
   "{{ out_dir }}/results.npy",
+]
+
+[tasks.download-example-data]
+# Download and extract the Zenodo example videos under example_data/.
+cmd = "python scripts/download_example_data.py"
+inputs = [
+  "scripts/download_example_data.py",
+]
+outputs = [
+  "example_data/input_videos/GX_SINGLE_VIDEO.MP4",
+  "example_data/input_videos/GX_VIDEO_1_OF_2.MP4",
+  "example_data/input_videos/GX_VIDEO_2_OF_2.MP4",
 ]
 
 [tasks.train-sfm]
@@ -69,6 +84,9 @@ outputs = [
 [tasks._install]
 # Fetch Git-LFS managed checkpoint files used by the reconstruction workflow.
 cmd = "git-lfs pull"
+inputs = [
+  ".gitattributes",
+]
 outputs = [
   "sfm_net.pth",
   "segmentation_net.pth",
@@ -115,10 +133,8 @@ no-build-isolation = true
 mee-deepreefmap = { path = ".", editable = true }
 
 # GoPro Metadata Format stream parser (C extension; uses git submodules).
-# pip / uv will clone the repo and initialise submodules automatically.
-# Pinned to the same commit as `ARG GPMFSTREAM_GIT_HASH` in `Dockerfile`
-# (the upstream repository does not publish versioned releases; update both
-# files together when bumping the revision).
+# Pixi will clone the repo and initialise submodules automatically.
+# Pinned because the upstream repository does not publish versioned releases.
 gpmfstream = { git = "https://github.com/Tobias-Fischer/gpmfstream", rev = "ab23cfd06f65a04c3de835bba3747f6aefa6a40d" }
 
 [feature.cuda.target.linux-64.dependencies]
